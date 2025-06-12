@@ -1,8 +1,17 @@
 import React, { useState } from 'react';
 import { auth, db } from '../firebase';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
-import { doc, setDoc, getDoc } from 'firebase/firestore'; // ✅ Added getDoc
+import { doc, setDoc } from 'firebase/firestore';
 import { useNavigate } from 'react-router-dom';
+
+// 🔹 Dummy worker data stored locally
+const dummyWorkers = {
+  'worker-001': { name: 'Ramesh', ward: 'Ward 5' },
+  'worker-002': { name: 'Sneha', ward: 'Ward 3' },
+  'worker-003': { name: 'Vikram', ward: 'Ward 7' },
+  'worker-004': { name: 'Asha', ward: 'Ward 1' },
+  'worker-005': { name: 'Manoj', ward: 'Ward 4' },
+};
 
 const SignUp = () => {
   const [email, setEmail] = useState('');
@@ -13,6 +22,11 @@ const SignUp = () => {
   const navigate = useNavigate();
 
   const handleSignUp = async () => {
+    if (!email || !password) {
+      setError('❌ Please enter all required fields');
+      return;
+    }
+
     if (role === 'worker' && !workerID.trim()) {
       setError('❌ Please enter your Worker ID');
       return;
@@ -24,22 +38,21 @@ const SignUp = () => {
 
       const userData = {
         email,
-        role,
+        role
       };
 
       if (role === 'worker') {
-        const workerRef = doc(db, 'workers', workerID.trim());
-        const workerSnap = await getDoc(workerRef);
+        const cleanedID = workerID.trim().toLowerCase();
+        const workerInfo = dummyWorkers[cleanedID];
 
-        if (!workerSnap.exists()) {
+        if (!workerInfo) {
           setError('❌ Worker ID not found in admin list.');
           return;
         }
 
-        const { name, ward } = workerSnap.data();
-        userData.workerID = workerID;
-        userData.name = name;
-        userData.ward = ward;
+        userData.workerID = cleanedID;
+        userData.name = workerInfo.name;
+        userData.ward = workerInfo.ward;
       }
 
       await setDoc(doc(db, 'users', uid), userData);
@@ -100,7 +113,7 @@ const SignUp = () => {
             type="text"
             placeholder="Enter Worker ID"
             value={workerID}
-            onChange={(e) => setWorkerID(e.target.value)}
+            onChange={(e) => setWorkerID(e.target.value.toLowerCase())}
             style={{ marginBottom: '1rem', width: '100%', padding: '0.5rem' }}
           />
         )}
