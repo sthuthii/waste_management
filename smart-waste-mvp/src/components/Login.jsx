@@ -34,26 +34,56 @@ const Login = () => {
   };
 
   return (
-    <div style={{ padding: '2rem', maxWidth: '400px', margin: 'auto' }}>
-      <h2>🔐 Login</h2>
-      <input
-        type="email"
-        placeholder="Email"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        style={{ marginBottom: '1rem', width: '100%', padding: '0.5rem' }}
-      />
-      <input
-        type="password"
-        placeholder="Password"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-        style={{ marginBottom: '1rem', width: '100%', padding: '0.5rem' }}
-      />
-      <button onClick={handleLogin} style={{ padding: '0.5rem 1rem' }}>
-        Login
-      </button>
-      {error && <p style={{ color: 'red', marginTop: '1rem' }}>{error}</p>}
+    <div style={{
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      width: '100vw',
+      height: '100vh',
+      backgroundColor: '#f5f5f5',
+      margin: 0,
+      padding: 0,
+      boxSizing: 'border-box'
+    }}>
+      <div style={{
+        padding: '2rem',
+        maxWidth: '400px',
+        width: '100%',
+        backgroundColor: '#fff',
+        borderRadius: '8px',
+        boxShadow: '0 0 10px rgba(0,0,0,0.1)'
+      }}>
+        <h2>🔐 Login</h2>
+        <input
+          type="email"
+          placeholder="Email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          style={{ marginBottom: '1rem', width: '100%', padding: '0.5rem' }}
+        />
+        <input
+          type="password"
+          placeholder="Password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          style={{ marginBottom: '1rem', width: '100%', padding: '0.5rem' }}
+        />
+        <button
+          onClick={handleLogin}
+          style={{
+            padding: '0.5rem 1rem',
+            width: '100%',
+            backgroundColor: '#4CAF50',
+            color: 'white',
+            border: 'none',
+            cursor: 'pointer'
+          }}
+        >
+          Login
+        </button>
+
+        {error && <p style={{ color: 'red', marginTop: '1rem' }}>{error}</p>}
+      </div>
     </div>
   );
 };
