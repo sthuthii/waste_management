@@ -4,12 +4,6 @@ A scalable, real-time, role-based web app to digitize and track door-to-door was
 
 ---
 
-## 🚀 Live Demo
-
-[👉 Click here to access the deployed version](#)
-
----
-
 ## 🔐 Role-Based Access
 
 | Role     | Description |
