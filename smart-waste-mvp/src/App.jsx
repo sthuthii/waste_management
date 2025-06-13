@@ -1,11 +1,11 @@
-import AppRoutes from './routes';
+// src/App.jsx
+import React from 'react';
+import AppRoutes from './AppRoutes'; // NO BrowserRouter here
 
-function App() {
+const App = () => {
   return (
-    <div className="App">
-      <AppRoutes />
-    </div>
+    <AppRoutes />
   );
-}
+};
 
 export default App;

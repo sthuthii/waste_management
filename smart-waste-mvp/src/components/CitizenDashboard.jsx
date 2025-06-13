@@ -5,6 +5,7 @@ import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
 const CitizenDashboard = () => {
   const [houseID, setHouseID] = useState('');
+  const [message, setMessage] = useState('');
   const [image, setImage] = useState(null);
   const [status, setStatus] = useState('');
 
@@ -19,14 +20,17 @@ const CitizenDashboard = () => {
     try {
       let imageUrl = '';
 
+      // Upload image if present
       if (image) {
         const imageRef = ref(storage, `reports/${houseID}_${Date.now()}.jpg`);
         await uploadBytes(imageRef, image);
         imageUrl = await getDownloadURL(imageRef);
       }
 
+      // Store report in Firestore
       await addDoc(collection(db, 'reports'), {
         houseID,
+        message: message.trim(),
         imageUrl,
         timestamp: Timestamp.now(),
         resolved: false,
@@ -34,6 +38,7 @@ const CitizenDashboard = () => {
 
       setStatus("✅ Report submitted successfully.");
       setHouseID('');
+      setMessage('');
       setImage(null);
     } catch (error) {
       console.error("Error submitting report:", error);
@@ -44,12 +49,21 @@ const CitizenDashboard = () => {
   return (
     <div style={{ padding: '2rem', maxWidth: '500px', margin: 'auto' }}>
       <h2>🙋 Citizen Dashboard</h2>
+
       <input
         type="text"
         placeholder="Enter House ID"
         value={houseID}
         onChange={(e) => setHouseID(e.target.value)}
         style={{ width: '100%', padding: '0.5rem', marginBottom: '1rem' }}
+      />
+
+      <textarea
+        placeholder="Enter your message (e.g., My garbage was not picked up today)"
+        value={message}
+        onChange={(e) => setMessage(e.target.value)}
+        rows={4}
+        style={{ width: '100%', padding: '0.5rem', marginBottom: '1rem', resize: 'vertical' }}
       />
 
       <input
