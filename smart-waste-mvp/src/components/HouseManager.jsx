@@ -10,7 +10,7 @@ const HouseManager = () => {
       const querySnapshot = await getDocs(collection(db, 'houses'));
       const houseList = querySnapshot.docs.map((doc) => ({
         id: doc.id,
-        ...doc.data()
+        ...doc.data(),
       }));
       setHouses(houseList);
     };
@@ -21,11 +21,29 @@ const HouseManager = () => {
   const markUncollected = async (houseId) => {
     const houseRef = doc(db, 'houses', houseId);
     await updateDoc(houseRef, {
-      collectedToday: false
+      collectedToday: false,
+      collectedAt: null, // Optionally clear the timestamp
     });
     setHouses((prev) =>
-      prev.map((h) => h.id === houseId ? { ...h, collectedToday: false } : h)
+      prev.map((h) =>
+        h.id === houseId
+          ? { ...h, collectedToday: false, collectedAt: null }
+          : h
+      )
     );
+  };
+
+  const formatDateTime = (timestamp) => {
+    if (!timestamp || !timestamp.toDate) return '';
+    const date = timestamp.toDate();
+    return `${date.toLocaleDateString('en-IN', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+    })} at ${date.toLocaleTimeString('en-IN', {
+      hour: '2-digit',
+      minute: '2-digit',
+    })}`;
   };
 
   return (
@@ -47,7 +65,17 @@ const HouseManager = () => {
               <td>{house.address}</td>
               <td>{house.ward}</td>
               <td>{house.assignedTo}</td>
-              <td>{house.collectedToday ? '✅ Collected' : '❌ Not Collected'}</td>
+              <td>
+                {house.collectedToday ? (
+                  <>
+                    ✅ Collected
+                    <br />
+                    <small>{formatDateTime(house.collectedAt)}</small>
+                  </>
+                ) : (
+                  '❌ Not Collected'
+                )}
+              </td>
               <td>
                 {house.collectedToday && (
                   <button onClick={() => markUncollected(house.id)}>
