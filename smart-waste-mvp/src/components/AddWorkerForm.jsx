@@ -21,7 +21,7 @@ const AdminWorkerManager = () => {
     const querySnapshot = await getDocs(collection(db, 'workers'));
     const list = querySnapshot.docs.map((doc) => ({
       id: doc.id,
-      ...doc.data()
+      ...doc.data(),
     }));
     setWorkers(list);
   };
@@ -32,7 +32,7 @@ const AdminWorkerManager = () => {
 
   const handleSubmit = async () => {
     if (!workerID || !name || !ward) {
-      setStatus('❌ Please fill all fields');
+      setStatus('Please fill all fields');
       return;
     }
 
@@ -43,7 +43,7 @@ const AdminWorkerManager = () => {
       setName('');
       setWard('');
       setIsEditing(false);
-      fetchWorkers(); // refresh list
+      fetchWorkers();
     } catch (error) {
       console.error(error);
       setStatus('❌ Operation failed');
@@ -58,125 +58,149 @@ const AdminWorkerManager = () => {
   };
 
   const handleDelete = async (id) => {
-    if (window.confirm("Are you sure you want to delete this worker?")) {
+    if (window.confirm('Are you sure you want to delete this worker?')) {
       await deleteDoc(doc(db, 'workers', id));
       setStatus('✅ Worker deleted');
-      fetchWorkers(); // refresh
+      fetchWorkers();
     }
   };
 
+  const inputStyle = {
+    width: '100%',
+    padding: '0.75rem',
+    marginBottom: '1rem',
+    border: '1px solid #ccc',
+    borderRadius: '6px',
+    fontSize: '1rem',
+  };
+
+  const buttonStyle = {
+    width: '100%',
+    padding: '0.75rem',
+    backgroundColor: '#02560bff',
+    color: '#fff',
+    border: 'none',
+    borderRadius: '6px',
+    fontSize: '1rem',
+    cursor: 'pointer',
+    transition: 'background-color 0.3s ease',
+  };
+
+  const sectionCard = {
+    backgroundColor: '#fff',
+    padding: '2rem',
+    borderRadius: '10px',
+    boxShadow: '0 4px 12px rgba(0,0,0,0.05)',
+    marginBottom: '2rem',
+  };
+
   return (
-    <div style={{ maxWidth: '600px', margin: 'auto', padding: '2rem' }}>
-      <h2>👩‍⚕️ Admin – Manage Workers</h2>
+    <div style={{ maxWidth: '700px', margin: 'auto', padding: '2rem', fontFamily: 'Segoe UI, sans-serif', backgroundColor: '#f9f9f9' }}>
+      <h2 style={{ textAlign: 'center', marginBottom: '2rem', color: '#333' }}> Manage Sanitation Workers</h2>
 
-      <input
-        type="text"
-        placeholder="Worker ID"
-        value={workerID}
-        onChange={(e) => setWorkerID(e.target.value)}
-        disabled={isEditing}
-        style={{ width: '100%', padding: '0.5rem', marginBottom: '1rem' }}
-      />
-      <input
-        type="text"
-        placeholder="Worker Name"
-        value={name}
-        onChange={(e) => setName(e.target.value)}
-        style={{ width: '100%', padding: '0.5rem', marginBottom: '1rem' }}
-      />
-      <input
-        type="text"
-        placeholder="Ward"
-        value={ward}
-        onChange={(e) => setWard(e.target.value)}
-        style={{ width: '100%', padding: '0.5rem', marginBottom: '1rem' }}
-      />
-      <button
-        onClick={handleSubmit}
-        style={{
-          width: '100%',
-          padding: '0.5rem',
-          backgroundColor: '#4CAF50',
-          color: 'white',
-          border: 'none',
-          cursor: 'pointer'
-        }}
-      >
-        {isEditing ? 'Update Worker' : 'Add Worker'}
-      </button>
+      <div style={sectionCard}>
+        <h3 style={{ marginBottom: '1rem', color: '#444' }}>{isEditing ? ' Edit Worker' : 'Add New Worker'}</h3>
 
-      {status && <p style={{ marginTop: '1rem', color: status.startsWith('✅') ? 'green' : 'red' }}>{status}</p>}
+        <input
+          type="text"
+          placeholder="Worker ID"
+          value={workerID}
+          onChange={(e) => setWorkerID(e.target.value)}
+          disabled={isEditing}
+          style={inputStyle}
+        />
+        <input
+          type="text"
+          placeholder="Worker Name"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          style={inputStyle}
+        />
+        <input
+          type="text"
+          placeholder="Ward"
+          value={ward}
+          onChange={(e) => setWard(e.target.value)}
+          style={inputStyle}
+        />
 
-      <h3 style={{ marginTop: '2rem' }}>📋 Worker List</h3>
-      <input
-        type="text"
-        placeholder="Filter by Ward"
-        value={filterWard}
-        onChange={(e) => setFilterWard(e.target.value)}
-        style={{
-          width: '100%',
-          padding: '0.5rem',
-          marginBottom: '1rem',
-          border: '1px solid #ccc',
-          borderRadius: '4px'
-        }}
-      />
+        <button onClick={handleSubmit} style={buttonStyle}>
+          {isEditing ? 'Update Worker' : 'Add Worker'}
+        </button>
 
-      {workers
-        .filter((worker) =>
-          worker.ward.toLowerCase().includes(filterWard.toLowerCase())
-        )
-        .map((worker) => (
-          <div
-            key={worker.id}
-            style={{
-              backgroundColor: '#f5f5f5',
-              padding: '1rem',
-              marginBottom: '1rem',
-              borderRadius: '6px',
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center'
-            }}
-          >
-            <div>
-              <p><strong>ID:</strong> {worker.id}</p>
-              <p><strong>Name:</strong> {worker.name}</p>
-              <p><strong>Ward:</strong> {worker.ward}</p>
+        {status && (
+          <p style={{ marginTop: '1rem', color: status.startsWith('✅') ? '#043907ff' : '#480303ff' }}>
+            {status}
+          </p>
+        )}
+      </div>
+
+      <div style={sectionCard}>
+        <h3 style={{ marginBottom: '1rem', color: '#444' }}>Worker List</h3>
+
+        <input
+          type="text"
+          placeholder="Filter by Ward"
+          value={filterWard}
+          onChange={(e) => setFilterWard(e.target.value)}
+          style={inputStyle}
+        />
+
+        {workers
+          .filter((worker) => worker.ward.toLowerCase().includes(filterWard.toLowerCase()))
+          .map((worker) => (
+            <div
+              key={worker.id}
+              style={{
+                backgroundColor: '#f1f1f1',
+                padding: '1rem',
+                marginBottom: '1rem',
+                borderRadius: '8px',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'flex-start',
+              }}
+            >
+              <div style={{ flex: 1 }}>
+                <p><strong>ID:</strong> {worker.id}</p>
+                <p><strong>Name:</strong> {worker.name}</p>
+                <p><strong>Ward:</strong> {worker.ward}</p>
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                <button
+                  onClick={() => handleEdit(worker)}
+                  style={{
+                    padding: '0.4rem 0.8rem',
+                    backgroundColor: '#00254bff',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '4px',
+                    cursor: 'pointer',
+                  }}
+                >
+                  Edit
+                </button>
+                <button
+                  onClick={() => handleDelete(worker.id)}
+                  style={{
+                    padding: '0.4rem 0.8rem',
+                    backgroundColor: '#600404ff',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '4px',
+                    cursor: 'pointer',
+                  }}
+                >
+                  Delete
+                </button>
+              </div>
             </div>
-            <div>
-              <button
-                onClick={() => handleEdit(worker)}
-                style={{
-                  marginRight: '0.5rem',
-                  padding: '0.3rem 0.6rem',
-                  backgroundColor: '#2196F3',
-                  color: 'white',
-                  border: 'none',
-                  cursor: 'pointer'
-                }}
-              >
-                Edit
-              </button>
-              <button
-                onClick={() => handleDelete(worker.id)}
-                style={{
-                  padding: '0.3rem 0.6rem',
-                  backgroundColor: 'red',
-                  color: 'white',
-                  border: 'none',
-                  cursor: 'pointer'
-                }}
-              >
-                Delete
-              </button>
-            </div>
-          </div>
-        ))}
+          ))}
 
-      {workers.filter((w) => w.ward.toLowerCase().includes(filterWard.toLowerCase())).length === 0 && (
-        <p>No workers found for this ward.</p>
-      )}
+        {workers.filter((w) => w.ward.toLowerCase().includes(filterWard.toLowerCase())).length === 0 && (
+          <p style={{ color: '#666' }}>No workers found for this ward.</p>
+        )}
+      </div>
     </div>
   );
 };

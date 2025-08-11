@@ -4,6 +4,7 @@ import { db } from '../firebase';
 
 const HouseManager = () => {
   const [houses, setHouses] = useState([]);
+  const [filterWard, setFilterWard] = useState('');
 
   useEffect(() => {
     const fetchHouses = async () => {
@@ -22,7 +23,7 @@ const HouseManager = () => {
     const houseRef = doc(db, 'houses', houseId);
     await updateDoc(houseRef, {
       collectedToday: false,
-      collectedAt: null, // Optionally clear the timestamp
+      collectedAt: null,
     });
     setHouses((prev) =>
       prev.map((h) =>
@@ -46,45 +47,83 @@ const HouseManager = () => {
     })}`;
   };
 
+  const filteredHouses = houses.filter((house) =>
+    house.ward.toLowerCase().includes(filterWard.toLowerCase())
+  );
+
   return (
-    <div style={{ padding: '2rem' }}>
-      <h2>🏠 All Houses (Admin)</h2>
-      <table border="1" cellPadding="10" style={{ width: '100%', borderCollapse: 'collapse' }}>
-        <thead>
+    <div style={{ padding: '2rem', fontFamily: 'Segoe UI, sans-serif', backgroundColor: '#f9f9f9', minHeight: '100vh' }}>
+      <h2 style={{ textAlign: 'center', marginBottom: '2rem', color: '#333' }}>All Houses</h2>
+
+      <input
+        type="text"
+        placeholder="Filter by Ward"
+        value={filterWard}
+        onChange={(e) => setFilterWard(e.target.value)}
+        style={{
+          width: '100%',
+          padding: '0.75rem',
+          marginBottom: '1.5rem',
+          borderRadius: '6px',
+          border: '1px solid #ccc',
+          fontSize: '1rem',
+        }}
+      />
+
+      <table style={{ width: '100%', borderCollapse: 'collapse', backgroundColor: '#fff', borderRadius: '10px', overflow: 'hidden' }}>
+        <thead style={{ backgroundColor: '#610101ff', color: 'white' }}>
           <tr>
-            <th>Address</th>
-            <th>Ward</th>
-            <th>Assigned Worker</th>
-            <th>Status</th>
-            <th>Action</th>
+            <th style={{ padding: '1rem' }}>Address</th>
+            <th style={{ padding: '1rem' }}>Ward</th>
+            <th style={{ padding: '1rem' }}>Assigned Worker</th>
+            <th style={{ padding: '1rem' }}>Status</th>
+            <th style={{ padding: '1rem' }}>Action</th>
           </tr>
         </thead>
         <tbody>
-          {houses.map((house) => (
-            <tr key={house.id}>
-              <td>{house.address}</td>
-              <td>{house.ward}</td>
-              <td>{house.assignedTo}</td>
-              <td>
-                {house.collectedToday ? (
-                  <>
-                    ✅ Collected
-                    <br />
-                    <small>{formatDateTime(house.collectedAt)}</small>
-                  </>
-                ) : (
-                  '❌ Not Collected'
-                )}
-              </td>
-              <td>
-                {house.collectedToday && (
-                  <button onClick={() => markUncollected(house.id)}>
-                    Reset to Not Collected
-                  </button>
-                )}
+          {filteredHouses.length > 0 ? (
+            filteredHouses.map((house) => (
+              <tr key={house.id} style={{ borderBottom: '1px solid #eee' }}>
+                <td style={{ padding: '1rem' }}>{house.address}</td>
+                <td style={{ padding: '1rem' }}>{house.ward}</td>
+                <td style={{ padding: '1rem' }}>{house.assignedTo || '—'}</td>
+                <td style={{ padding: '1rem' }}>
+                  {house.collectedToday ? (
+                    <>
+                      ✅ Collected
+                      <br />
+                      <small style={{ color: '#555' }}>{formatDateTime(house.collectedAt)}</small>
+                    </>
+                  ) : (
+                    <span style={{ color: '#D32F2F' }}>Not Collected</span>
+                  )}
+                </td>
+                <td style={{ padding: '1rem' }}>
+                  {house.collectedToday && (
+                    <button
+                      onClick={() => markUncollected(house.id)}
+                      style={{
+                        padding: '0.4rem 0.8rem',
+                        backgroundColor: '#89630bff',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '5px',
+                        cursor: 'pointer',
+                      }}
+                    >
+                      Reset
+                    </button>
+                  )}
+                </td>
+              </tr>
+            ))
+          ) : (
+            <tr>
+              <td colSpan="5" style={{ padding: '1.5rem', textAlign: 'center', color: '#777' }}>
+                No houses found for this ward.
               </td>
             </tr>
-          ))}
+          )}
         </tbody>
       </table>
     </div>

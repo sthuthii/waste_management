@@ -1,17 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { auth, db } from '../firebase';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
-import { doc, setDoc } from 'firebase/firestore';
+import { collection, doc, setDoc, getDocs } from 'firebase/firestore';
 import { useNavigate } from 'react-router-dom';
-
-// 🔹 Dummy worker data stored locally
-const dummyWorkers = {
-  'worker-001': { name: 'Ramesh', ward: 'Ward 5' },
-  'worker-002': { name: 'Sneha', ward: 'Ward 3' },
-  'worker-003': { name: 'Vikram', ward: 'Ward 7' },
-  'worker-004': { name: 'Asha', ward: 'Ward 1' },
-  'worker-005': { name: 'Manoj', ward: 'Ward 4' },
-};
 
 const SignUp = () => {
   const [email, setEmail] = useState('');
@@ -19,9 +10,29 @@ const SignUp = () => {
   const [role, setRole] = useState('citizen');
   const [workerID, setWorkerID] = useState('');
   const [error, setError] = useState('');
+  const [allWorkers, setAllWorkers] = useState([]);
   const navigate = useNavigate();
 
+  useEffect(() => {
+    const fetchWorkers = async () => {
+      try {
+        const snapshot = await getDocs(collection(db, 'workers'));
+        const workerList = snapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        setAllWorkers(workerList);
+      } catch (err) {
+        console.error('Failed to fetch workers:', err);
+      }
+    };
+
+    fetchWorkers();
+  }, []);
+
   const handleSignUp = async () => {
+    setError('');
+
     if (!email || !password) {
       setError('❌ Please enter all required fields');
       return;
@@ -38,21 +49,23 @@ const SignUp = () => {
 
       const userData = {
         email,
-        role
+        role,
       };
 
       if (role === 'worker') {
         const cleanedID = workerID.trim().toLowerCase();
-        const workerInfo = dummyWorkers[cleanedID];
+        const matchedWorker = allWorkers.find(
+          (w) => w.id.toLowerCase() === cleanedID
+        );
 
-        if (!workerInfo) {
-          setError('❌ Worker ID not found in admin list.');
+        if (!matchedWorker) {
+          setError('❌ Worker ID not found in the system.');
           return;
         }
 
-        userData.workerID = cleanedID;
-        userData.name = workerInfo.name;
-        userData.ward = workerInfo.ward;
+        userData.workerID = matchedWorker.id;
+        userData.name = matchedWorker.name;
+        userData.ward = matchedWorker.ward;
       }
 
       await setDoc(doc(db, 'users', uid), userData);
@@ -63,45 +76,79 @@ const SignUp = () => {
     }
   };
 
+  const inputStyle = {
+    marginBottom: '1rem',
+    width: '100%',
+    padding: '0.75rem',
+    borderRadius: '6px',
+    border: '1px solid #ccc',
+    fontSize: '1rem',
+  };
+
+  const buttonStyle = {
+    padding: '0.75rem 1rem',
+    width: '100%',
+    backgroundColor: '#4CAF50',
+    color: 'white',
+    border: 'none',
+    borderRadius: '6px',
+    fontSize: '1rem',
+    cursor: 'pointer',
+    marginTop: '0.5rem',
+    transition: '0.3s ease',
+  };
+
+  const secondaryButton = {
+    ...buttonStyle,
+    backgroundColor: '#1976D2',
+  };
+
   return (
-    <div style={{
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      width: '100vw',
-      height: '100vh',
-      backgroundColor: '#f5f5f5',
-      margin: 0,
-      padding: 0,
-      boxSizing: 'border-box'
-    }}>
-      <div style={{
-        padding: '2rem',
-        maxWidth: '400px',
-        width: '100%',
-        backgroundColor: '#fff',
-        borderRadius: '8px',
-        boxShadow: '0 0 10px rgba(0,0,0,0.1)'
-      }}>
-        <h2>📝 Sign Up</h2>
+    <div
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        width: '100vw',
+        height: '100vh',
+        background: 'linear-gradient(to right, #e3f2fd, #f9f9f9)',
+        padding: 0,
+        boxSizing: 'border-box',
+        fontFamily: 'Segoe UI, sans-serif',
+      }}
+    >
+      <div
+        style={{
+          padding: '2.5rem',
+          maxWidth: '420px',
+          width: '100%',
+          backgroundColor: '#fff',
+          borderRadius: '12px',
+          boxShadow: '0 4px 18px rgba(0,0,0,0.1)',
+        }}
+      >
+        <h2 style={{ textAlign: 'center', marginBottom: '2rem', color: '#333' }}>📝 Create an Account</h2>
+
         <input
           type="email"
           placeholder="Email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          style={{ marginBottom: '1rem', width: '100%', padding: '0.5rem' }}
+          style={inputStyle}
         />
+
         <input
           type="password"
           placeholder="Password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          style={{ marginBottom: '1rem', width: '100%', padding: '0.5rem' }}
+          style={inputStyle}
         />
+
         <select
           value={role}
           onChange={(e) => setRole(e.target.value)}
-          style={{ marginBottom: '1rem', width: '100%', padding: '0.5rem' }}
+          style={inputStyle}
         >
           <option value="citizen">Citizen</option>
           <option value="worker">Worker</option>
@@ -114,40 +161,23 @@ const SignUp = () => {
             placeholder="Enter Worker ID"
             value={workerID}
             onChange={(e) => setWorkerID(e.target.value.toLowerCase())}
-            style={{ marginBottom: '1rem', width: '100%', padding: '0.5rem' }}
+            style={inputStyle}
           />
         )}
 
-        <button
-          onClick={handleSignUp}
-          style={{
-            padding: '0.5rem 1rem',
-            width: '100%',
-            backgroundColor: '#4CAF50',
-            color: 'white',
-            border: 'none',
-            cursor: 'pointer'
-          }}
-        >
+        <button onClick={handleSignUp} style={buttonStyle}>
           Register
         </button>
 
-        <button
-          onClick={() => navigate('/login')}
-          style={{
-            marginTop: '0.5rem',
-            padding: '0.5rem 1rem',
-            width: '100%',
-            backgroundColor: '#2196F3',
-            color: 'white',
-            border: 'none',
-            cursor: 'pointer'
-          }}
-        >
+        <button onClick={() => navigate('/login')} style={secondaryButton}>
           Already have an account? Login
         </button>
 
-        {error && <p style={{ color: 'red', marginTop: '1rem' }}>{error}</p>}
+        {error && (
+          <p style={{ color: '#D32F2F', marginTop: '1rem', textAlign: 'center' }}>
+            {error}
+          </p>
+        )}
       </div>
     </div>
   );
