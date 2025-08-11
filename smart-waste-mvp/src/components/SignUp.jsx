@@ -34,12 +34,12 @@ const SignUp = () => {
     setError('');
 
     if (!email || !password) {
-      setError('❌ Please enter all required fields');
+      setError('Please enter all required fields');
       return;
     }
 
     if (role === 'worker' && !workerID.trim()) {
-      setError('❌ Please enter your Worker ID');
+      setError('Please enter your Worker ID');
       return;
     }
 
@@ -59,7 +59,7 @@ const SignUp = () => {
         );
 
         if (!matchedWorker) {
-          setError('❌ Worker ID not found in the system.');
+          setError('Worker ID not found in the system.');
           return;
         }
 
@@ -72,7 +72,7 @@ const SignUp = () => {
       navigate('/login');
     } catch (err) {
       console.error(err);
-      setError('❌ Sign-up failed');
+      setError('Sign-up failed');
     }
   };
 

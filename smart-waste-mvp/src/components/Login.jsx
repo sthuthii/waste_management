@@ -53,7 +53,7 @@ const Login = () => {
         borderRadius: '8px',
         boxShadow: '0 0 10px rgba(0,0,0,0.1)'
       }}>
-        <h2>🔐 Login</h2>
+        <h2>Login</h2>
         <input
           type="email"
           placeholder="Email"
@@ -73,7 +73,7 @@ const Login = () => {
           style={{
             padding: '0.5rem 1rem',
             width: '100%',
-            backgroundColor: '#4CAF50',
+            backgroundColor: '#036406ff',
             color: 'white',
             border: 'none',
             cursor: 'pointer'
